@@ -45,9 +45,18 @@
             this.selLatestWorksheet = new System.Windows.Forms.ComboBox();
             this.btnLoadNewTermList = new System.Windows.Forms.Button();
             this.tabCompareIOList = new System.Windows.Forms.TabPage();
+            this.btnAddInstrumentList = new System.Windows.Forms.Button();
+            this.btnAddTermList = new System.Windows.Forms.Button();
+            this.btnAddIOList = new System.Windows.Forms.Button();
+            this.lstInstrumentLists = new System.Windows.Forms.ListBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.lstTermLists = new System.Windows.Forms.ListBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lstIOLists = new System.Windows.Forms.ListBox();
+            this.btnCreateFatSheet = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.btnCreateFatSheet = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabCompareTermLists.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numColStart2)).BeginInit();
@@ -266,6 +275,15 @@
             // 
             // tabCompareIOList
             // 
+            this.tabCompareIOList.Controls.Add(this.btnAddInstrumentList);
+            this.tabCompareIOList.Controls.Add(this.btnAddTermList);
+            this.tabCompareIOList.Controls.Add(this.btnAddIOList);
+            this.tabCompareIOList.Controls.Add(this.lstInstrumentLists);
+            this.tabCompareIOList.Controls.Add(this.label3);
+            this.tabCompareIOList.Controls.Add(this.lstTermLists);
+            this.tabCompareIOList.Controls.Add(this.label2);
+            this.tabCompareIOList.Controls.Add(this.label1);
+            this.tabCompareIOList.Controls.Add(this.lstIOLists);
             this.tabCompareIOList.Controls.Add(this.btnCreateFatSheet);
             this.tabCompareIOList.Location = new System.Drawing.Point(4, 22);
             this.tabCompareIOList.Name = "tabCompareIOList";
@@ -275,19 +293,99 @@
             this.tabCompareIOList.Text = "Compare IO Lists";
             this.tabCompareIOList.UseVisualStyleBackColor = true;
             // 
-            // openFileDialog1
+            // btnAddInstrumentList
             // 
-            this.openFileDialog1.FileName = "openFileDialog1";
+            this.btnAddInstrumentList.Location = new System.Drawing.Point(497, 163);
+            this.btnAddInstrumentList.Name = "btnAddInstrumentList";
+            this.btnAddInstrumentList.Size = new System.Drawing.Size(124, 23);
+            this.btnAddInstrumentList.TabIndex = 9;
+            this.btnAddInstrumentList.Text = "Add Instrument List";
+            this.btnAddInstrumentList.UseVisualStyleBackColor = true;
+            // 
+            // btnAddTermList
+            // 
+            this.btnAddTermList.Location = new System.Drawing.Point(290, 164);
+            this.btnAddTermList.Name = "btnAddTermList";
+            this.btnAddTermList.Size = new System.Drawing.Size(124, 23);
+            this.btnAddTermList.TabIndex = 8;
+            this.btnAddTermList.Text = "Add Termination List";
+            this.btnAddTermList.UseVisualStyleBackColor = true;
+            // 
+            // btnAddIOList
+            // 
+            this.btnAddIOList.Location = new System.Drawing.Point(82, 164);
+            this.btnAddIOList.Name = "btnAddIOList";
+            this.btnAddIOList.Size = new System.Drawing.Size(124, 23);
+            this.btnAddIOList.TabIndex = 7;
+            this.btnAddIOList.Text = "Add IO List";
+            this.btnAddIOList.UseVisualStyleBackColor = true;
+            this.btnAddIOList.Click += new System.EventHandler(this.btnAddIOList_Click);
+            // 
+            // lstInstrumentLists
+            // 
+            this.lstInstrumentLists.FormattingEnabled = true;
+            this.lstInstrumentLists.Location = new System.Drawing.Point(420, 23);
+            this.lstInstrumentLists.Name = "lstInstrumentLists";
+            this.lstInstrumentLists.Size = new System.Drawing.Size(201, 134);
+            this.lstInstrumentLists.TabIndex = 6;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(417, 7);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(80, 13);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "Instrument Lists";
+            // 
+            // lstTermLists
+            // 
+            this.lstTermLists.FormattingEnabled = true;
+            this.lstTermLists.Location = new System.Drawing.Point(213, 23);
+            this.lstTermLists.Name = "lstTermLists";
+            this.lstTermLists.Size = new System.Drawing.Size(201, 134);
+            this.lstTermLists.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(210, 7);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(86, 13);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "Termination Lists";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(7, 7);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(42, 13);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "IO Lists";
+            // 
+            // lstIOLists
+            // 
+            this.lstIOLists.FormattingEnabled = true;
+            this.lstIOLists.Location = new System.Drawing.Point(6, 23);
+            this.lstIOLists.Name = "lstIOLists";
+            this.lstIOLists.Size = new System.Drawing.Size(201, 134);
+            this.lstIOLists.TabIndex = 1;
             // 
             // btnCreateFatSheet
             // 
-            this.btnCreateFatSheet.Location = new System.Drawing.Point(49, 148);
+            this.btnCreateFatSheet.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCreateFatSheet.Location = new System.Drawing.Point(503, 402);
             this.btnCreateFatSheet.Name = "btnCreateFatSheet";
-            this.btnCreateFatSheet.Size = new System.Drawing.Size(121, 23);
+            this.btnCreateFatSheet.Size = new System.Drawing.Size(121, 46);
             this.btnCreateFatSheet.TabIndex = 0;
             this.btnCreateFatSheet.Text = "Create FAT Sheet";
             this.btnCreateFatSheet.UseVisualStyleBackColor = true;
             this.btnCreateFatSheet.Click += new System.EventHandler(this.btnCreateFatSheet_Click);
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // Form1
             // 
@@ -305,6 +403,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numColStart1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numRowStart1)).EndInit();
             this.tabCompareIOList.ResumeLayout(false);
+            this.tabCompareIOList.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -331,6 +430,15 @@
         private System.Windows.Forms.Label lblProgress1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.Button btnCreateFatSheet;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ListBox lstIOLists;
+        private System.Windows.Forms.ListBox lstInstrumentLists;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ListBox lstTermLists;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btnAddInstrumentList;
+        private System.Windows.Forms.Button btnAddTermList;
+        private System.Windows.Forms.Button btnAddIOList;
     }
 }
 

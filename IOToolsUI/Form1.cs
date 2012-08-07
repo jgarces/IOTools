@@ -28,6 +28,10 @@ namespace IOToolsUI
             InitializeComponent();
         }
 
+        /****************************************************************
+         * Compare Termination Lists
+         ****************************************************************/
+
         private void btnLoadNewTermList_Click(object sender, EventArgs e)
         {
             selLatestWorksheet.Items.Clear();
@@ -198,58 +202,106 @@ namespace IOToolsUI
             }
         }
 
+        /****************************************************************
+         * Create FAT Sheets
+         ****************************************************************/
+
+        private void btnAddIOList_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Title = "Add File";
+            openFileDialog1.Filter = "All Files (*.xlsm)|*.xlsm";
+            openFileDialog1.FileName = "";
+
+            openFileDialog1.ShowDialog();
+
+            string sFilePath;
+            sFilePath = openFileDialog1.FileName;
+            if (sFilePath == "")
+                return;
+
+            // make sure the file exists before adding
+            // its path to the list of files to be
+            // compressed
+            if (File.Exists(sFilePath) == false)
+            {
+                return;
+            }
+            else
+            {
+                //TerminationList tList = new TerminationList(sFilePath);
+                fiLatest = new FileInfo(sFilePath);
+
+                epLatest = new ExcelPackage(fiLatest);
+
+                lblLatestFilename1.Text = fiLatest.Name;
+                lblLatestFilename1.Visible = true;
+
+                foreach (ExcelWorksheet ws in epLatest.Workbook.Worksheets)
+                {
+                    Console.WriteLine(ws.Name);
+                    selLatestWorksheet.Items.Add(ws.Name);
+                }
+
+                selLatestWorksheet.Visible = true;
+            }
+        }
+
         private void btnCreateFatSheet_Click(object sender, EventArgs e)
         {
 
-            List<Dictionary<string, string>> ioSheets = new List<Dictionary<string, string>>();
-            Dictionary<string, string> ioSheet1 = new Dictionary<string,string>()
-            {
-                { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1317-IN-LST-1001_3.001.120523.xlsm" },
-                { "worksheet", "1317-SR-107" },
-                { "startRow", "3" },
-                { "startCol", "1" },
-                { "numRows", "1128" },
-            };
 
-            ioSheets.Add(ioSheet1);
 
-            List<Dictionary<string, string>> termSheets = new List<Dictionary<string, string>>();
-            Dictionary<string, string> termSheet1 = new Dictionary<string, string>()
-            {
-                { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1317-IN-LST-1031_1.001.120523.xlsm" },
-                { "worksheet", "1317-IN-LST-1031_1" },
-                { "startRow", "6" },
-                { "startCol", "1" },
-                { "numRows", "921" },
-            };
-            Dictionary<string, string> termSheet2 = new Dictionary<string, string>()
-            {
-                { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1320-IN-LST-1031_D.001.120523.xlsm" },
-                { "worksheet", "1320-IN-LST-1031_D" },
-                { "startRow", "6" },
-                { "startCol", "1" },
-                { "numRows", "310" },
-            };
+            //List<Dictionary<string, string>> ioSheets = new List<Dictionary<string, string>>();
+            //Dictionary<string, string> ioSheet1 = new Dictionary<string,string>()
+            //{
+            //    { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1317-IN-LST-1001_3.001.120523.xlsm" },
+            //    { "worksheet", "1317-SR-107" },
+            //    { "startRow", "3" },
+            //    { "startCol", "1" },
+            //    { "numRows", "1128" },
+            //};
 
-            termSheets.Add(termSheet1);
-            termSheets.Add(termSheet2);
+            //ioSheets.Add(ioSheet1);
 
-            List<Dictionary<string, string>> instrumentSheets = new List<Dictionary<string, string>>();
-            Dictionary<string, string> instrSheet1 = new Dictionary<string, string>()
-            {
-                { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1300-IN-LST-1004_1_BMcL.xlsm" },
-                { "worksheet", "1301 IN List bmcl revs" },
-                { "startRow", "2" },
-                { "startCol", "1" },
-                { "numRows", "6767" },
-            };
+            //List<Dictionary<string, string>> termSheets = new List<Dictionary<string, string>>();
+            //Dictionary<string, string> termSheet1 = new Dictionary<string, string>()
+            //{
+            //    { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1317-IN-LST-1031_1.001.120523.xlsm" },
+            //    { "worksheet", "1317-IN-LST-1031_1" },
+            //    { "startRow", "6" },
+            //    { "startCol", "1" },
+            //    { "numRows", "921" },
+            //};
+            //Dictionary<string, string> termSheet2 = new Dictionary<string, string>()
+            //{
+            //    { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1320-IN-LST-1031_D.001.120523.xlsm" },
+            //    { "worksheet", "1320-IN-LST-1031_D" },
+            //    { "startRow", "6" },
+            //    { "startCol", "1" },
+            //    { "numRows", "310" },
+            //};
 
-            instrumentSheets.Add(instrSheet1);
+            //termSheets.Add(termSheet1);
+            //termSheets.Add(termSheet2);
 
-            List<string> marshallingPanels = new List<string>(){ "1317-MP-280" };
+            //List<Dictionary<string, string>> instrumentSheets = new List<Dictionary<string, string>>();
+            //Dictionary<string, string> instrSheet1 = new Dictionary<string, string>()
+            //{
+            //    { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1300-IN-LST-1004_1_BMcL.xlsm" },
+            //    { "worksheet", "1301 IN List bmcl revs" },
+            //    { "startRow", "2" },
+            //    { "startCol", "1" },
+            //    { "numRows", "6767" },
+            //};
 
-            API.createMPFat(ioSheets.AsEnumerable(), termSheets.AsEnumerable(), instrumentSheets.AsEnumerable(), marshallingPanels);
+            //instrumentSheets.Add(instrSheet1);
+
+            //List<string> marshallingPanels = new List<string>(){ "1317-MP-280" };
+
+            //API.createMPFat(ioSheets.AsEnumerable(), termSheets.AsEnumerable(), instrumentSheets.AsEnumerable(), marshallingPanels);
         }
+
+        
 
 
     }
