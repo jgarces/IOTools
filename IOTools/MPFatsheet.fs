@@ -27,6 +27,11 @@ let createMPFatLists (excelTemplate:string) (termList:TermRecord list) (ioList:I
                                 |> List.map(fun termRecord -> (termRecord.Tagname1.Replace("SE", "ST"), termRecord))
                                 |> Map.ofList
 
+        let isolatorMap = termList
+                            |> List.filter (fun termRecord -> termRecord.PLCStrip27.StartsWith("LOOPISOLATOR-INPUT"))
+                            |> List.map(fun termRecord -> (termRecord.Tagname1, termRecord))
+                            |> Map.ofList
+
 //        let mptermlist = termList 
 //                            |> List.filter (fun termRecord -> termRecord.MarshallingPanel22 = mp)
 //                            |> List.filter (fun termRecord -> termRecord.PLCAddress37.Length > 0 && termRecord.Tagname1.Length > 0 && (termRecord.TS2WireNumber28.Length > 0 || termRecord.TS1WireNumber26.Length > 0))
@@ -36,9 +41,10 @@ let createMPFatLists (excelTemplate:string) (termList:TermRecord list) (ioList:I
                             |> List.filter (fun termRecord -> termRecord.Tagname1.Length > 0 && (termRecord.TS2WireNumber28.Length > 0 || termRecord.TS1WireNumber26.Length > 0))
 
         let handleIntermediateConnections (termRecord:TermRecord) =
-            match termRecord.MPFieldTerm24 with
-            | "" -> (interposingRelayMap.[termRecord.Tagname1]).MPFieldStrip23,  (int (interposingRelayMap.[termRecord.Tagname1]).MPFieldTerm24)
-            | "+PS" | "-PS" -> (speedTransmitMap.[termRecord.Tagname1]).MPFieldStrip23, (int (speedTransmitMap.[termRecord.Tagname1]).MPFieldTerm24)
+            match termRecord.MPFieldTerm24, termRecord.PLCStrip27 with
+            | "", "LOOPISOLATOR-OUTPUT+" | "", "LOOPISOLATOR-OUTPUT-" -> (isolatorMap.[termRecord.Tagname1]).MPFieldStrip23, (int (isolatorMap.[termRecord.Tagname1]).MPFieldTerm24)
+            | "", _ -> (interposingRelayMap.[termRecord.Tagname1]).MPFieldStrip23,  (int (interposingRelayMap.[termRecord.Tagname1]).MPFieldTerm24)
+            | "+PS", _ | "-PS", _ -> (speedTransmitMap.[termRecord.Tagname1]).MPFieldStrip23, (int (speedTransmitMap.[termRecord.Tagname1]).MPFieldTerm24)
             | _ -> termRecord.MPFieldStrip23, (int termRecord.MPFieldTerm24)
 
         let mptermlistOrdered = mptermlist
