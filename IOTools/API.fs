@@ -45,6 +45,7 @@ let compareTerminationLists newFilename newWorksheet newStartRow newStartCol new
 
 let createMPFat ioData termData instrumentData (listofMarshallingPanels:ResizeArray<string>) = 
 
+    let mutable fatSheetFilename = ""
     let mutable completeIOLIst = []
     for fileData : Dictionary<string,string> in ioData do
         let startCell = getStartCellAsTuple (Convert.ToInt32(fileData.["startRow"])) (Convert.ToInt32(fileData.["startCol"]))
@@ -66,16 +67,13 @@ let createMPFat ioData termData instrumentData (listofMarshallingPanels:ResizeAr
         let instrumentList = getExcelDataAsListOf<InstrumentRecord> instrumentFile
         completeInstrumentList <- completeInstrumentList @ instrumentList
     
-    let templateFile = @"C:\Users\rpattison\Documents\Karara\MP-280\MarshallingPanelTemplate.xlsm"
-
-    //let mps = 
+    let templateFile = @"data\MarshallingPanelTemplate.xlsm"
 
     let test = List.ofSeq(listofMarshallingPanels)
-    createMPFatLists templateFile completeTermList completeIOLIst completeInstrumentList test
+    fatSheetFilename <- createMPFatLists templateFile completeTermList completeIOLIst completeInstrumentList test
+    Console.WriteLine(fatSheetFilename);
 
-    let complete = "done"
-
-    complete
+    fatSheetFilename
 
     
 

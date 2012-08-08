@@ -150,4 +150,4 @@ let createMPFatLists (excelTemplate:string) (termList:TermRecord list) (ioList:I
     package.Workbook.Worksheets.Delete("MPTemplate")
     package.Save()
 
-    
+    FATtestsheet.FullName

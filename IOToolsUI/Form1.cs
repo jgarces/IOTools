@@ -26,6 +26,8 @@ namespace IOToolsUI
         public Form1()
         {
             InitializeComponent();
+
+            this.tabControl1.SelectedTab = tabCompareIOList;
         }
 
         /****************************************************************
@@ -203,12 +205,84 @@ namespace IOToolsUI
         }
 
         /****************************************************************
-        /****************************************************************
          * Create FAT Sheets
          ****************************************************************/
 
+        private struct ExcelDataFile
+        {
+            public string Filename { get; set; }
+            public string Worksheet { get; set; }
+            public int StartRow { get; set; }
+            public int StartCol { get; set; }
+
+            public ExcelDataFile(string filename)
+                : this()
+            {
+                this.Filename = filename;
+            }
+            public ExcelDataFile(string filename, string ws)
+                : this()
+            {
+                this.Filename = filename;
+                this.Worksheet = ws;
+            }
+            public ExcelDataFile(string filename, string ws, int sR, int sC)
+                : this()
+            {
+                this.Filename = filename;
+                this.Worksheet = ws;
+                this.StartRow = sR;
+                this.StartCol = sC;
+            }
+            
+            public override string ToString()
+            {
+                FileInfo fi = new FileInfo(Filename);
+                return fi.Name + " :: [" + Worksheet + "] (" + StartRow + "," + StartCol + ")";
+            }
+
+            public int GetNumberOfRows()
+            {
+                FileInfo fi = new FileInfo(this.Filename);
+                ExcelPackage ep = new ExcelPackage(fi);
+                ExcelWorksheet ws = ep.Workbook.Worksheets[this.Worksheet];
+                return ws.Dimension.End.Row;
+            }
+
+            public Dictionary<string, string> AsDictionary()
+            {
+                return new Dictionary<string, string>()
+                {
+                    { "filename", this.Filename },
+                    { "worksheet", this.Worksheet },
+                    { "startRow", this.StartRow.ToString() },
+                    { "startCol", this.StartCol.ToString() },
+                    { "numRows", this.GetNumberOfRows().ToString() },
+                };
+            }
+        }
+
+        private List<ExcelDataFile> FatIOLists = new List<ExcelDataFile>();
+        private List<ExcelDataFile> FatTermLists = new List<ExcelDataFile>();
+        private List<ExcelDataFile> FatInstLists = new List<ExcelDataFile>();
+
+        private ExcelDataFile CurDataFile;
+
+
+        /**
+         * IO Lists
+         */
+
         private void btnAddIOList_Click(object sender, EventArgs e)
         {
+            // reset
+            CurDataFile = new ExcelDataFile();
+            selFatIOWorksheets.Items.Clear();
+            selFatIOWorksheets.Text = "Select Worksheet";
+            // disable other file open buttons
+            btnFatAddTermList.Enabled = false;
+            btnFatAddInstrumentList.Enabled = false;
+
             openFileDialog1.Title = "Add File";
             openFileDialog1.Filter = "All Files (*.xlsm)|*.xlsm";
             openFileDialog1.FileName = "";
@@ -220,90 +294,355 @@ namespace IOToolsUI
             if (sFilePath == "")
                 return;
 
-            // make sure the file exists before adding
-            // its path to the list of files to be
-            // compressed
-            if (File.Exists(sFilePath) == false)
+            if (File.Exists(sFilePath) )
             {
-                return;
-            }
-            else
-            {
-                //TerminationList tList = new TerminationList(sFilePath);
-                fiLatest = new FileInfo(sFilePath);
+                FileInfo fi = new FileInfo(sFilePath);
+                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                Console.WriteLine(nfi.FullName);
+                ExcelPackage ep = new ExcelPackage(nfi);
 
-                epLatest = new ExcelPackage(fiLatest);
-
-                lblLatestFilename1.Text = fiLatest.Name;
-                lblLatestFilename1.Visible = true;
-
-                foreach (ExcelWorksheet ws in epLatest.Workbook.Worksheets)
+                CurDataFile.Filename = nfi.FullName;
+                
+                foreach (ExcelWorksheet ws in ep.Workbook.Worksheets)
                 {
-                    Console.WriteLine(ws.Name);
-                    selLatestWorksheet.Items.Add(ws.Name);
+                    selFatIOWorksheets.Items.Add(ws.Name);
                 }
 
-                selLatestWorksheet.Visible = true;
+                selFatIOWorksheets.Visible = true;
+            }
+        }
+
+        private void selFatIOWorksheets_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblFatIOStartCell.Visible = true;
+            numFatIORowStart.Visible = true;
+            numFatIOColStart.Visible = true;
+            btnFatAddIOToList.Visible = true;
+
+            CurDataFile.Worksheet = selFatIOWorksheets.SelectedItem.ToString();
+            CurDataFile.StartRow = Convert.ToInt32(numFatIORowStart.Value);
+            CurDataFile.StartCol = Convert.ToInt32(numFatIOColStart.Value);
+        }
+
+        private void numFatIORowStart_ValueChanged(object sender, EventArgs e)
+        {
+            CurDataFile.StartRow = Convert.ToInt32(numFatIORowStart.Value);
+        }
+
+        private void numFatIOColStart_ValueChanged(object sender, EventArgs e)
+        {
+            CurDataFile.StartCol = Convert.ToInt32(numFatIOColStart.Value);
+        }
+
+        private void btnFatAddIOToList_Click(object sender, EventArgs e)
+        {
+            // Add the curDataFile to the List IO list
+            FatIOLists.Add(CurDataFile);
+
+            // Clear the list display and add all
+            lstIOFilesList.Items.Clear();
+            foreach (ExcelDataFile edf in FatIOLists)
+            {
+                FileInfo fi = new FileInfo(edf.Filename);
+                lstIOFilesList.Items.Add(fi.Name + " [" + edf.Worksheet + "] " + " (" + edf.StartRow + "," + edf.StartCol + ") ");
+            }
+
+            // Hide and reset controls
+            selFatIOWorksheets.Visible = false;
+            selFatIOWorksheets.Items.Clear();
+            lblFatIOStartCell.Visible = false;
+            numFatIORowStart.Visible = false;
+            numFatIOColStart.Visible = false;
+            btnFatAddIOToList.Visible = false;
+            btnFatAddTermList.Enabled = true;
+            btnFatAddInstrumentList.Enabled = true;
+        }
+
+        private void lstIOFilesList_KeyDown(object sender, KeyEventArgs e)
+        {
+            _removeItemFromList(FatIOLists, lstIOFilesList, e);
+        }
+
+
+        /**
+         * Term Lists
+         */
+
+        private void btnAddTermList_Click(object sender, EventArgs e)
+        {
+            // reset
+            CurDataFile = new ExcelDataFile();
+            selFatTermWorksheets.Items.Clear();
+            selFatTermWorksheets.Text = "Select Worksheet";
+            // disable other file open buttons
+            btnFatAddIOList.Enabled = false;
+            btnFatAddInstrumentList.Enabled = false;
+
+            openFileDialog1.Title = "Add File";
+            openFileDialog1.Filter = "All Files (*.xlsm)|*.xlsm";
+            openFileDialog1.FileName = "";
+
+            openFileDialog1.ShowDialog();
+
+            string sFilePath;
+            sFilePath = openFileDialog1.FileName;
+            if (sFilePath == "")
+                return;
+
+            if (File.Exists(sFilePath))
+            {
+                FileInfo fi = new FileInfo(sFilePath);
+                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                Console.WriteLine(nfi.FullName);
+                ExcelPackage ep = new ExcelPackage(nfi);
+
+                CurDataFile.Filename = nfi.FullName;
+
+                foreach (ExcelWorksheet ws in ep.Workbook.Worksheets)
+                {
+                    selFatTermWorksheets.Items.Add(ws.Name);
+                }
+
+                selFatTermWorksheets.Visible = true;
+            }
+        }
+
+        private void selFatTermWorksheets_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblFatTermStartCell.Visible = true;
+            numFatTermRowStart.Visible = true;
+            numFatTermColStart.Visible = true;
+            btnFatAddTermToList.Visible = true;
+
+            CurDataFile.Worksheet = selFatTermWorksheets.SelectedItem.ToString();
+            CurDataFile.StartRow = Convert.ToInt32(numFatTermRowStart.Value);
+            CurDataFile.StartCol = Convert.ToInt32(numFatTermColStart.Value);
+        }
+
+        private void numFatTermRowStart_ValueChanged(object sender, EventArgs e)
+        {
+            CurDataFile.StartRow = Convert.ToInt32(numFatTermRowStart.Value);
+        }
+
+        private void numFatTermColStart_ValueChanged(object sender, EventArgs e)
+        {
+            CurDataFile.StartCol = Convert.ToInt32(numFatTermColStart.Value);
+        }
+
+        private void btnFatAddTermToList_Click(object sender, EventArgs e)
+        {
+            // Add the curDataFile to the List IO list
+            FatTermLists.Add(CurDataFile);
+
+            // Clear the list display and add all
+            lstTermFilesList.Items.Clear();
+            foreach (ExcelDataFile edf in FatTermLists)
+            {
+                FileInfo fi = new FileInfo(edf.Filename);
+                lstTermFilesList.Items.Add(fi.Name + " [" + edf.Worksheet + "] " + " (" + edf.StartRow + "," + edf.StartCol + ") ");
+            }
+
+            // Hide and reset controls
+            selFatTermWorksheets.Visible = false;
+            selFatTermWorksheets.Items.Clear();
+            lblFatTermStartCell.Visible = false;
+            numFatTermRowStart.Visible = false;
+            numFatTermColStart.Visible = false;
+            btnFatAddTermToList.Visible = false;
+            btnFatAddIOList.Enabled = true;
+            btnFatAddInstrumentList.Enabled = true;
+        }
+
+        private void lstTermFilesList_KeyDown(object sender, KeyEventArgs e)
+        {
+            _removeItemFromList(FatTermLists, lstTermFilesList, e);
+        }
+
+
+        /**
+         * Instrument Lists
+         */
+
+        private void btnFatAddInstrumentList_Click(object sender, EventArgs e)
+        {
+            // reset
+            CurDataFile = new ExcelDataFile();
+            selFatInstWorksheets.Items.Clear();
+            selFatInstWorksheets.Text = "Select Worksheet";
+            // disable other file open buttons
+            btnFatAddIOList.Enabled = false;
+            btnFatAddTermList.Enabled = false;
+
+            openFileDialog1.Title = "Add File";
+            openFileDialog1.Filter = "All Files (*.xlsm)|*.xlsm";
+            openFileDialog1.FileName = "";
+
+            openFileDialog1.ShowDialog();
+
+            string sFilePath;
+            sFilePath = openFileDialog1.FileName;
+            if (sFilePath == "")
+                return;
+
+            if (File.Exists(sFilePath))
+            {
+                FileInfo fi = new FileInfo(sFilePath);
+                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                Console.WriteLine(nfi.FullName);
+                ExcelPackage ep = new ExcelPackage(nfi);
+
+                CurDataFile.Filename = nfi.FullName;
+
+                foreach (ExcelWorksheet ws in ep.Workbook.Worksheets)
+                {
+                    selFatInstWorksheets.Items.Add(ws.Name);
+                }
+
+                selFatInstWorksheets.Visible = true;
+            }
+        }
+
+        private void selFatInstWorksheets_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblFatInstStartCell.Visible = true;
+            numFatInstRowStart.Visible = true;
+            numFatInstColStart.Visible = true;
+            btnFatAddInstToList.Visible = true;
+
+            CurDataFile.Worksheet = selFatInstWorksheets.SelectedItem.ToString();
+            CurDataFile.StartRow = Convert.ToInt32(numFatInstRowStart.Value);
+            CurDataFile.StartCol = Convert.ToInt32(numFatInstColStart.Value);
+        }
+
+        private void numFatInstRowStart_ValueChanged(object sender, EventArgs e)
+        {
+            CurDataFile.StartRow = Convert.ToInt32(numFatInstRowStart.Value);
+        }
+
+        private void numFatInstColStart_ValueChanged(object sender, EventArgs e)
+        {
+            CurDataFile.StartCol = Convert.ToInt32(numFatInstColStart.Value);
+        }
+
+        private void btnFatAddInstToList_Click(object sender, EventArgs e)
+        {
+            // Add the curDataFile to the List IO list
+            FatInstLists.Add(CurDataFile);
+
+            // Clear the list display and add all
+            lstInstrumentFilesList.Items.Clear();
+            foreach (ExcelDataFile edf in FatInstLists)
+            {
+                FileInfo fi = new FileInfo(edf.Filename);
+                lstInstrumentFilesList.Items.Add(fi.Name + " [" + edf.Worksheet + "] " + " (" + edf.StartRow + "," + edf.StartCol + ") ");
+            }
+
+            // Hide and reset controls
+            selFatInstWorksheets.Visible = false;
+            selFatInstWorksheets.Items.Clear();
+            lblFatInstStartCell.Visible = false;
+            numFatInstRowStart.Visible = false;
+            numFatInstColStart.Visible = false;
+            btnFatAddInstToList.Visible = false;
+            btnFatAddIOList.Enabled = true;
+            btnFatAddTermList.Enabled = true;
+        }
+
+        private void lstInstrumentFilesList_KeyDown(object sender, KeyEventArgs e)
+        {
+            _removeItemFromList(FatInstLists, lstInstrumentFilesList, e);
+        }
+
+
+        private void _removeItemFromList(List<ExcelDataFile> list, ListBox lb, KeyEventArgs e)
+        {
+            if (e.KeyValue == 46 && lb.Items.Count > 0)
+            {
+                // Remove from the FatIOList 
+                list.RemoveAt(lb.SelectedIndex);
+
+                // Clear the list display and re-add whats left in FatIOList
+                lb.Items.Clear();
+                foreach (ExcelDataFile edf in list)
+                {
+                    FileInfo fi = new FileInfo(edf.Filename);
+                    lb.Items.Add(fi.Name + " [" + edf.Worksheet + "] " + " (" + edf.StartRow + "," + edf.StartCol + ") ");
+                }
             }
         }
 
         private void btnCreateFatSheet_Click(object sender, EventArgs e)
         {
+            btnCreateFatSheet.Text = "Generating...";
+            this.Refresh();
 
+            List<Dictionary<string, string>> ioSheets = new List<Dictionary<string, string>>();
+            foreach (ExcelDataFile edf in FatIOLists)
+            {
+                ioSheets.Add(edf.AsDictionary());
+            }
 
+            List<Dictionary<string, string>> termSheets = new List<Dictionary<string, string>>();
+            foreach (ExcelDataFile edf in FatTermLists)
+            {
+                termSheets.Add(edf.AsDictionary());
+            }
 
-            //List<Dictionary<string, string>> ioSheets = new List<Dictionary<string, string>>();
-            //Dictionary<string, string> ioSheet1 = new Dictionary<string,string>()
-            //{
-            //    { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1317-IN-LST-1001_3.001.120523.xlsm" },
-            //    { "worksheet", "1317-SR-107" },
-            //    { "startRow", "3" },
-            //    { "startCol", "1" },
-            //    { "numRows", "1128" },
-            //};
+            List<Dictionary<string, string>> instrumentSheets = new List<Dictionary<string, string>>();
+            foreach (ExcelDataFile edf in FatInstLists)
+            {
+                instrumentSheets.Add(edf.AsDictionary());
+            }
 
-            //ioSheets.Add(ioSheet1);
+            List<string> marshallingPanels = new List<string>();
+            string[] mps = txtFatMarshallingPanels.Text.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            marshallingPanels.AddRange(mps);
 
-            //List<Dictionary<string, string>> termSheets = new List<Dictionary<string, string>>();
-            //Dictionary<string, string> termSheet1 = new Dictionary<string, string>()
-            //{
-            //    { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1317-IN-LST-1031_1.001.120523.xlsm" },
-            //    { "worksheet", "1317-IN-LST-1031_1" },
-            //    { "startRow", "6" },
-            //    { "startCol", "1" },
-            //    { "numRows", "921" },
-            //};
-            //Dictionary<string, string> termSheet2 = new Dictionary<string, string>()
-            //{
-            //    { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1320-IN-LST-1031_D.001.120523.xlsm" },
-            //    { "worksheet", "1320-IN-LST-1031_D" },
-            //    { "startRow", "6" },
-            //    { "startCol", "1" },
-            //    { "numRows", "310" },
-            //};
+            string fatSheetFilename = API.createMPFat(ioSheets.AsEnumerable(), termSheets.AsEnumerable(), instrumentSheets.AsEnumerable(), marshallingPanels);
 
-            //termSheets.Add(termSheet1);
-            //termSheets.Add(termSheet2);
+            if (fatSheetFilename != "")
+            {
+                btnCreateFatSheet.Text = "Create FAT Sheet";
+                this.Refresh();
 
-            //List<Dictionary<string, string>> instrumentSheets = new List<Dictionary<string, string>>();
-            //Dictionary<string, string> instrSheet1 = new Dictionary<string, string>()
-            //{
-            //    { "filename", @"C:\Users\rpattison\Documents\Karara\MP-280\1300-IN-LST-1004_1_BMcL.xlsm" },
-            //    { "worksheet", "1301 IN List bmcl revs" },
-            //    { "startRow", "2" },
-            //    { "startCol", "1" },
-            //    { "numRows", "6767" },
-            //};
+                saveFileDialog1.Filter = "Excel File (*.xlsm) | *.xlsm";
+                saveFileDialog1.RestoreDirectory = true;
+                saveFileDialog1.FileName = "FAT-Sheet.xlsm";
+                saveFileDialog1.Title = "Save file as";
+                saveFileDialog1.OverwritePrompt = false;
 
-            //instrumentSheets.Add(instrSheet1);
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    string strNewFilename = saveFileDialog1.FileName;
 
-            //List<string> marshallingPanels = new List<string>(){ "1317-MP-280" };
-
-            //API.createMPFat(ioSheets.AsEnumerable(), termSheets.AsEnumerable(), instrumentSheets.AsEnumerable(), marshallingPanels);
+                    if (strNewFilename != fatSheetFilename)
+                    {
+                        FileInfo fiFatFile = new FileInfo(fatSheetFilename);
+                        fiFatFile.CopyTo(strNewFilename);
+                        fiFatFile.Delete();
+                    }
+                }
+            }
         }
 
-        
-
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine("IO Lists:");
+            foreach (ExcelDataFile edf in FatIOLists)
+            {
+                Console.WriteLine(edf.ToString());
+            }
+            Console.WriteLine("Term Lists:");
+            foreach (ExcelDataFile edf in FatTermLists)
+            {
+                Console.WriteLine(edf.ToString());
+            }
+            Console.WriteLine("INstrument Lists:");
+            foreach (ExcelDataFile edf in FatInstLists)
+            {
+                Console.WriteLine(edf.ToString());
+            }
+        }
 
     }
 }

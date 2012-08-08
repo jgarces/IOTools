@@ -1385,29 +1385,58 @@ open Microsoft.FSharp.Reflection
 
 //**********************************************************************
 
-let ioList1317 = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-250\1304-IN-LST-1003_2.001.120515.xlsm" "1304-IN-LST-1003_2" (2,1) 3584 true
-let listIO1317 = getExcelDataAsListOf<IORecord> ioList1317
+//let ioList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-280\1317-IN-LST-1001_3.001.120523.xlsm" "1317-SR-107" (3,1) 1128 true
+//let listIO = getExcelDataAsListOf<IORecord> ioList
+//
+//let termList1317 = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-280\1317-IN-LST-1031_2.001.120727.xlsm" "1317-IN-LST-1031_2" (6,1) 912 true
+//let listTerm1317 = getExcelDataAsListOf<TermRecord> termList1317
+//
+//let termList1320 = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-280\1320-IN-LST-1031_0.001.120730.xlsm" "1320-IN-LST-1031_0" (6,1) 315 true
+//let listTerm1320 = getExcelDataAsListOf<TermRecord> termList1320
+//
+//let listTermComplete = listTerm1317 @ listTerm1320
+//
+//let instrumentList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-280\1300-IN-LST-1004_1_BMcL.xlsm" "1301 IN List bmcl revs" (2,1) 6767 true 
+//let listInstrument = getExcelDataAsListOf<InstrumentRecord> instrumentList
+//
+////let instrumentList1307 = ExcelDataFile.create @"C:\Users\rpattison\Documents\370\1307-IN-LST-1004_1.xlsm" "Index" (3,1) 270 true
+////let listInstrument1307 = getExcelDataAsListOf<InstrumentRecord> instrumentList1307
+//
+//let listInstrumentComplete = listInstrument// @ listInstrument1307
+//
+//let listofMarshallingPanels = ["1317-MP-280"]
+//let templateFile = @"C:\Users\rpattison\Documents\Karara\MP-280\MarshallingPanelTemplate.xlsm"
+//createMPFatLists templateFile listTermComplete listIO listInstrumentComplete listofMarshallingPanels
 
-let termList1317 = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-250\1304-IN-LST-1031_3.001.120720.001.120720.xlsm" "1304-IN-LST-1031_3" (6,1) 2755 true
-let listTerm1317 = getExcelDataAsListOf<TermRecord> termList1317
+//**********************************************************************
 
-let termList1320 = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Motherwell\1306\1307-IN-LST-1031_3.002.120612.001.120614.xlsm" "1307-IN-LIST-1031_3" (6,1) 1024 true
-let listTerm1320 = getExcelDataAsListOf<TermRecord> termList1320
+//let ioList   = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-256\1318-IN-LST-1001_3.001.120525.xlsm" "1318-IN-LST-1001_3" (3,1) 9347 true
+//let listIO   = getExcelDataAsListOf<IORecord> ioList
+//
+//let termList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-256\1302-IN-LST-1031_2.001.120802.xlsm" "1302-IN-LST-1031_2" (6,1) 911 true
+//let listTerm = getExcelDataAsListOf<TermRecord> termList
+//
+//let instList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-256\1300-IN-LST-1004_1_BMcL.xlsm" "1301 IN List bmcl revs" (2,1) 6767 true 
+//let listInst = getExcelDataAsListOf<InstrumentRecord> instList
+//
+//let listofMarshallingPanels = ["1302-MP-256"]
+//let templateFile = @"C:\Users\rpattison\Documents\Karara\MP-256\MarshallingPanelTemplate.xlsm"
+//createMPFatLists templateFile listTerm listIO listInst listofMarshallingPanels
 
-let listTermComplete = listTerm1317 @ listTerm1320
+//**********************************************************************
 
-let instrumentList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-250\1300-IN-LST-1004_1_BMcL.xlsm" "1301 IN List bmcl revs" (2,1) 6767 true 
-let listInstrument = getExcelDataAsListOf<InstrumentRecord> instrumentList
+let ioList   = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-231\1318-IN-LST-1001_3.001.120525.xlsm" "1318-IN-LST-1001_3" (3,1) 9347 true
+let listIO   = getExcelDataAsListOf<IORecord> ioList
 
-//let instrumentList1307 = ExcelDataFile.create @"C:\Users\rpattison\Documents\370\1307-IN-LST-1004_1.xlsm" "Index" (3,1) 270 true
-//let listInstrument1307 = getExcelDataAsListOf<InstrumentRecord> instrumentList1307
+let termList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-231\1304-IN-LST-1032_2.001.120528.xlsm" "1304-IN-LST-1032_2" (6,1) 840 true
+let listTerm = getExcelDataAsListOf<TermRecord> termList
 
-let listInstrumentComplete = listInstrument// @ listInstrument1307
+let instList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-231\1300-IN-LST-1004_1_BMcL.xlsm" "1301 IN List bmcl revs" (2,1) 6767 true 
+let listInst = getExcelDataAsListOf<InstrumentRecord> instList
 
-let listofMarshallingPanels = ["1317-MP-280"]
-let templateFile = @"C:\Users\rpattison\Documents\Karara\MP-250\MarshallingPanelTemplate.xlsm"
-createMPFatLists templateFile listTermComplete listIO1317 listInstrumentComplete listofMarshallingPanels
-
+let listofMarshallingPanels = ["1304-MP-231"]
+let templateFile = @"C:\Users\rpattison\Documents\Karara\MP-231\MarshallingPanelTemplate.xlsm"
+createMPFatLists templateFile listTerm listIO listInst listofMarshallingPanels
 //**********************************************************************
 //
 //let ioList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-320\1315-IN-LST-1001_3.001.120506.xlsm" "1315-SR-111" (3,1) 300 true
@@ -1425,21 +1454,6 @@ createMPFatLists templateFile listTermComplete listIO1317 listInstrumentComplete
 //createMPFatLists templateFile listTerm listIO listInstrument listofMarshallingPanels
 
 //**********************************************************************
-
-let newFilename = @"C:\Users\rpattison\Documents\Karara\1311\1311-IN-LST-1031_0.xlsm"
-let newWorksheet = "1311-IN-LST-1031_0"
-let newStartRow = 6
-let newStartCol = 1
-let newNumRows = 757
-
-let oldFilename = @"C:\Users\rpattison\Documents\Karara\1311\1311-IN-LST-1031_1.xlsm"
-let oldWorksheet = "1311-IN-LST-1031_1"
-let oldStartRow = 6
-let oldStartCol = 1
-let oldNumRows = 775
-
-let result = API.compareTerminationLists newFilename newWorksheet newStartRow newStartCol newNumRows oldFilename oldWorksheet oldStartRow oldStartCol oldNumRows
-Console.WriteLine(result);
 
 
 //let termListold = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\1311\1311-IN-LST-1031_0.xlsm" "1311-IN-LST-1031_0" (6,1) 757 true
