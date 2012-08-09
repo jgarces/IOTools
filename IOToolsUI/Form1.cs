@@ -18,21 +18,73 @@ namespace IOToolsUI
     public partial class Form1 : Form
     {
 
-        public FileInfo fiLatest;
-        public FileInfo fiPrevious;
-        public ExcelPackage epLatest;
-        public ExcelPackage epPrevious;
-
         public Form1()
         {
             InitializeComponent();
 
-            this.tabControl1.SelectedTab = tabCompareIOList;
+            //this.tabControl1.SelectedTab = tabCompareIOList;
         }
 
         /****************************************************************
          * Compare Termination Lists
          ****************************************************************/
+
+        private struct ExcelDataFile
+        {
+            public string Filename { get; set; }
+            public string Worksheet { get; set; }
+            public int StartRow { get; set; }
+            public int StartCol { get; set; }
+
+            public ExcelDataFile(string filename)
+                : this()
+            {
+                this.Filename = filename;
+            }
+            public ExcelDataFile(string filename, string ws)
+                : this()
+            {
+                this.Filename = filename;
+                this.Worksheet = ws;
+            }
+            public ExcelDataFile(string filename, string ws, int sR, int sC)
+                : this()
+            {
+                this.Filename = filename;
+                this.Worksheet = ws;
+                this.StartRow = sR;
+                this.StartCol = sC;
+            }
+
+            public override string ToString()
+            {
+                FileInfo fi = new FileInfo(Filename);
+                return fi.Name + " :: [" + Worksheet + "] (" + StartRow + "," + StartCol + ")";
+            }
+
+            public int GetNumberOfRows()
+            {
+                FileInfo fi = new FileInfo(this.Filename);
+                ExcelPackage ep = new ExcelPackage(fi);
+                ExcelWorksheet ws = ep.Workbook.Worksheets[this.Worksheet];
+                return ws.Dimension.End.Row;
+            }
+
+            public Dictionary<string, string> AsDictionary()
+            {
+                return new Dictionary<string, string>()
+                {
+                    { "filename", this.Filename },
+                    { "worksheet", this.Worksheet },
+                    { "startRow", this.StartRow.ToString() },
+                    { "startCol", this.StartCol.ToString() },
+                    { "numRows", this.GetNumberOfRows().ToString() },
+                };
+            }
+        }
+
+        private ExcelDataFile edfLatest;
+        private ExcelDataFile edfPrevious;
 
         private void btnLoadNewTermList_Click(object sender, EventArgs e)
         {
@@ -44,7 +96,7 @@ namespace IOToolsUI
             selLatestWorksheet.Visible = false;
             
             openFileDialog1.Title = "Add File";
-            openFileDialog1.Filter = "All Files (*.*)|*.*";
+            openFileDialog1.Filter = "Excel Macro-Enabled Workbook (*.xlsm)|*.xlsm";
             openFileDialog1.FileName = "";
 
             openFileDialog1.ShowDialog();
@@ -54,26 +106,21 @@ namespace IOToolsUI
             if (sFilePath == "")
                 return;
 
-            // make sure the file exists before adding
-            // its path to the list of files to be
-            // compressed
-            if (File.Exists(sFilePath) == false)
+            if (File.Exists(sFilePath))
             {
-                return;
-            }
-            else
-            {
-                //TerminationList tList = new TerminationList(sFilePath);
-                fiLatest = new FileInfo(sFilePath);
+                FileInfo fi = new FileInfo(sFilePath);
+                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
 
-                epLatest = new ExcelPackage(fiLatest);
+                ExcelPackage epLatest = new ExcelPackage(nfi);
 
-                lblLatestFilename1.Text = fiLatest.Name;
+                edfLatest = new ExcelDataFile();
+                edfLatest.Filename = nfi.FullName;
+
+                lblLatestFilename1.Text = nfi.Name;
                 lblLatestFilename1.Visible = true;
 
                 foreach (ExcelWorksheet ws in epLatest.Workbook.Worksheets)
                 {
-                    Console.WriteLine(ws.Name);
                     selLatestWorksheet.Items.Add(ws.Name);
                 }
 
@@ -83,6 +130,10 @@ namespace IOToolsUI
 
         private void selLatestWorksheet1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            //edfLatest.Worksheet = selLatestWorksheet.SelectedItem.ToString();
+            //CurDataFile.StartRow = Convert.ToInt32(numFatIORowStart.Value);
+            //CurDataFile.StartCol = Convert.ToInt32(numFatIOColStart.Value);
+
             lblCellStart1.Visible = true;
             numColStart1.Visible = true;
             numRowStart1.Visible = true;
@@ -103,7 +154,7 @@ namespace IOToolsUI
             selPreviousWorksheet.Visible = false;
 
             openFileDialog1.Title = "Add File";
-            openFileDialog1.Filter = "All Files (*.*)|*.*";
+            openFileDialog1.Filter = "Excel Macro-Enabled Workbook (*.xlsm)|*.xlsm";
             openFileDialog1.FileName = "";
 
             openFileDialog1.ShowDialog();
@@ -113,26 +164,21 @@ namespace IOToolsUI
             if (sFilePath == "")
                 return;
 
-            // make sure the file exists before adding
-            // its path to the list of files to be
-            // compressed
-            if (File.Exists(sFilePath) == false)
+            if (File.Exists(sFilePath))
             {
-                return;
-            }
-            else
-            {
-                //TerminationList tList = new TerminationList(sFilePath);
-                fiPrevious = new FileInfo(sFilePath);
+                FileInfo fi = new FileInfo(sFilePath);
+                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
 
-                epPrevious = new ExcelPackage(fiPrevious);
+                ExcelPackage epPrevious = new ExcelPackage(nfi);
 
-                lblPreviousFilename1.Text = fiPrevious.Name;
+                edfPrevious = new ExcelDataFile();
+                edfPrevious.Filename = nfi.FullName;
+
+                lblPreviousFilename1.Text = nfi.Name;
                 lblPreviousFilename1.Visible = true;
 
                 foreach (ExcelWorksheet ws in epPrevious.Workbook.Worksheets)
                 {
-                    Console.WriteLine(ws.Name);
                     selPreviousWorksheet.Items.Add(ws.Name);
                 }
 
@@ -159,22 +205,15 @@ namespace IOToolsUI
             lblProgress1.Text = "Comparing...";
             this.Refresh();
 
-            string strLatestFilename = fiLatest.FullName;
-            string strPrevFilename = fiPrevious.FullName;
+            edfLatest.Worksheet = selLatestWorksheet.SelectedItem.ToString();
+            edfLatest.StartRow = Convert.ToInt32(numRowStart1.Value);
+            edfLatest.StartCol = Convert.ToInt32(numColStart1.Value);
 
-            string strLatestWorksheet = selLatestWorksheet.SelectedItem.ToString();
-            string strPrevWorksheet = selPreviousWorksheet.SelectedItem.ToString();
+            edfPrevious.Worksheet = selPreviousWorksheet.SelectedItem.ToString();
+            edfPrevious.StartRow = Convert.ToInt32(numRowStart2.Value);
+            edfPrevious.StartCol = Convert.ToInt32(numColStart2.Value);
 
-            int iLatestNumRows = epLatest.Workbook.Worksheets[strLatestWorksheet].Dimension.End.Row;
-            int iPrevNumRows = epPrevious.Workbook.Worksheets[strPrevWorksheet].Dimension.End.Row;
-
-            int iLatestRowStart = Convert.ToInt32(numRowStart1.Value);
-            int iLatestColStart = Convert.ToInt32(numColStart1.Value);
-            int iPrevRowStart = Convert.ToInt32(numRowStart2.Value);
-            int iPrevColStart = Convert.ToInt32(numColStart2.Value);
-
-            string strDiffFilename = API.compareTerminationLists(strLatestFilename, strLatestWorksheet, iLatestRowStart, iLatestColStart, iLatestNumRows,
-                                                                strPrevFilename, strPrevWorksheet, iPrevRowStart, iPrevColStart, iPrevNumRows);
+            string strDiffFilename = API.compareTerminationLists(edfLatest.AsDictionary(), edfPrevious.AsDictionary());
 
             if (strDiffFilename != "")
             {
@@ -208,66 +247,11 @@ namespace IOToolsUI
          * Create FAT Sheets
          ****************************************************************/
 
-        private struct ExcelDataFile
-        {
-            public string Filename { get; set; }
-            public string Worksheet { get; set; }
-            public int StartRow { get; set; }
-            public int StartCol { get; set; }
-
-            public ExcelDataFile(string filename)
-                : this()
-            {
-                this.Filename = filename;
-            }
-            public ExcelDataFile(string filename, string ws)
-                : this()
-            {
-                this.Filename = filename;
-                this.Worksheet = ws;
-            }
-            public ExcelDataFile(string filename, string ws, int sR, int sC)
-                : this()
-            {
-                this.Filename = filename;
-                this.Worksheet = ws;
-                this.StartRow = sR;
-                this.StartCol = sC;
-            }
-            
-            public override string ToString()
-            {
-                FileInfo fi = new FileInfo(Filename);
-                return fi.Name + " :: [" + Worksheet + "] (" + StartRow + "," + StartCol + ")";
-            }
-
-            public int GetNumberOfRows()
-            {
-                FileInfo fi = new FileInfo(this.Filename);
-                ExcelPackage ep = new ExcelPackage(fi);
-                ExcelWorksheet ws = ep.Workbook.Worksheets[this.Worksheet];
-                return ws.Dimension.End.Row;
-            }
-
-            public Dictionary<string, string> AsDictionary()
-            {
-                return new Dictionary<string, string>()
-                {
-                    { "filename", this.Filename },
-                    { "worksheet", this.Worksheet },
-                    { "startRow", this.StartRow.ToString() },
-                    { "startCol", this.StartCol.ToString() },
-                    { "numRows", this.GetNumberOfRows().ToString() },
-                };
-            }
-        }
-
         private List<ExcelDataFile> FatIOLists = new List<ExcelDataFile>();
         private List<ExcelDataFile> FatTermLists = new List<ExcelDataFile>();
         private List<ExcelDataFile> FatInstLists = new List<ExcelDataFile>();
 
         private ExcelDataFile CurDataFile;
-
 
         /**
          * IO Lists
@@ -284,7 +268,7 @@ namespace IOToolsUI
             btnFatAddInstrumentList.Enabled = false;
 
             openFileDialog1.Title = "Add File";
-            openFileDialog1.Filter = "All Files (*.xlsm)|*.xlsm";
+            openFileDialog1.Filter = "Excel Macro-Enabled Workbook (*.xlsm)|*.xlsm";
             openFileDialog1.FileName = "";
 
             openFileDialog1.ShowDialog();
@@ -298,7 +282,6 @@ namespace IOToolsUI
             {
                 FileInfo fi = new FileInfo(sFilePath);
                 FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
-                Console.WriteLine(nfi.FullName);
                 ExcelPackage ep = new ExcelPackage(nfi);
 
                 CurDataFile.Filename = nfi.FullName;
@@ -339,13 +322,7 @@ namespace IOToolsUI
             // Add the curDataFile to the List IO list
             FatIOLists.Add(CurDataFile);
 
-            // Clear the list display and add all
-            lstIOFilesList.Items.Clear();
-            foreach (ExcelDataFile edf in FatIOLists)
-            {
-                FileInfo fi = new FileInfo(edf.Filename);
-                lstIOFilesList.Items.Add(fi.Name + " [" + edf.Worksheet + "] " + " (" + edf.StartRow + "," + edf.StartCol + ") ");
-            }
+            _repopulateList(FatIOLists, lstIOFilesList);
 
             // Hide and reset controls
             selFatIOWorksheets.Visible = false;
@@ -379,7 +356,7 @@ namespace IOToolsUI
             btnFatAddInstrumentList.Enabled = false;
 
             openFileDialog1.Title = "Add File";
-            openFileDialog1.Filter = "All Files (*.xlsm)|*.xlsm";
+            openFileDialog1.Filter = "Excel Macro-Enabled Workbook (*.xlsm)|*.xlsm";
             openFileDialog1.FileName = "";
 
             openFileDialog1.ShowDialog();
@@ -434,13 +411,7 @@ namespace IOToolsUI
             // Add the curDataFile to the List IO list
             FatTermLists.Add(CurDataFile);
 
-            // Clear the list display and add all
-            lstTermFilesList.Items.Clear();
-            foreach (ExcelDataFile edf in FatTermLists)
-            {
-                FileInfo fi = new FileInfo(edf.Filename);
-                lstTermFilesList.Items.Add(fi.Name + " [" + edf.Worksheet + "] " + " (" + edf.StartRow + "," + edf.StartCol + ") ");
-            }
+            _repopulateList(FatTermLists, lstTermFilesList);
 
             // Hide and reset controls
             selFatTermWorksheets.Visible = false;
@@ -474,7 +445,7 @@ namespace IOToolsUI
             btnFatAddTermList.Enabled = false;
 
             openFileDialog1.Title = "Add File";
-            openFileDialog1.Filter = "All Files (*.xlsm)|*.xlsm";
+            openFileDialog1.Filter = "Excel Macro-Enabled Workbook (*.xlsm)|*.xlsm";
             openFileDialog1.FileName = "";
 
             openFileDialog1.ShowDialog();
@@ -488,7 +459,6 @@ namespace IOToolsUI
             {
                 FileInfo fi = new FileInfo(sFilePath);
                 FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
-                Console.WriteLine(nfi.FullName);
                 ExcelPackage ep = new ExcelPackage(nfi);
 
                 CurDataFile.Filename = nfi.FullName;
@@ -529,13 +499,7 @@ namespace IOToolsUI
             // Add the curDataFile to the List IO list
             FatInstLists.Add(CurDataFile);
 
-            // Clear the list display and add all
-            lstInstrumentFilesList.Items.Clear();
-            foreach (ExcelDataFile edf in FatInstLists)
-            {
-                FileInfo fi = new FileInfo(edf.Filename);
-                lstInstrumentFilesList.Items.Add(fi.Name + " [" + edf.Worksheet + "] " + " (" + edf.StartRow + "," + edf.StartCol + ") ");
-            }
+            _repopulateList(FatInstLists, lstInstrumentFilesList);
 
             // Hide and reset controls
             selFatInstWorksheets.Visible = false;
@@ -553,6 +517,16 @@ namespace IOToolsUI
             _removeItemFromList(FatInstLists, lstInstrumentFilesList, e);
         }
 
+        private void _repopulateList(List<ExcelDataFile> list, ListBox lb)
+        {
+            // Clear the list display and re-add whats left in FatIOList
+            lb.Items.Clear();
+            foreach (ExcelDataFile edf in list)
+            {
+                FileInfo fi = new FileInfo(edf.Filename);
+                lb.Items.Add(fi.Name + " [" + edf.Worksheet + "] " + " (" + edf.StartRow + "," + edf.StartCol + ") ");
+            }
+        }
 
         private void _removeItemFromList(List<ExcelDataFile> list, ListBox lb, KeyEventArgs e)
         {
@@ -561,13 +535,7 @@ namespace IOToolsUI
                 // Remove from the FatIOList 
                 list.RemoveAt(lb.SelectedIndex);
 
-                // Clear the list display and re-add whats left in FatIOList
-                lb.Items.Clear();
-                foreach (ExcelDataFile edf in list)
-                {
-                    FileInfo fi = new FileInfo(edf.Filename);
-                    lb.Items.Add(fi.Name + " [" + edf.Worksheet + "] " + " (" + edf.StartRow + "," + edf.StartCol + ") ");
-                }
+                _repopulateList(list, lb);
             }
         }
 
@@ -622,25 +590,6 @@ namespace IOToolsUI
                         fiFatFile.Delete();
                     }
                 }
-            }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            Console.WriteLine("IO Lists:");
-            foreach (ExcelDataFile edf in FatIOLists)
-            {
-                Console.WriteLine(edf.ToString());
-            }
-            Console.WriteLine("Term Lists:");
-            foreach (ExcelDataFile edf in FatTermLists)
-            {
-                Console.WriteLine(edf.ToString());
-            }
-            Console.WriteLine("INstrument Lists:");
-            foreach (ExcelDataFile edf in FatInstLists)
-            {
-                Console.WriteLine(edf.ToString());
             }
         }
 

@@ -15,16 +15,16 @@ let getStartCellAsTuple sR sC =
     let c = sC
     (r,c)
 
-let compareTerminationLists newFilename newWorksheet newStartRow newStartCol newNumRows oldFilename oldWorksheet oldStartRow oldStartCol oldNumRows = 
+//let compareTerminationLists newFilename newWorksheet newStartRow newStartCol newNumRows oldFilename oldWorksheet oldStartRow oldStartCol oldNumRows = 
+let compareTerminationLists (newTermList : Dictionary<string,string>) (oldTermList : Dictionary<string,string>) = 
     
     let mutable diffFilename = ""
 
-    let oldStartCell = getStartCellAsTuple oldStartRow oldStartCol
-    let newStartCell = getStartCellAsTuple newStartRow newStartCol
+    let oldStartCell = getStartCellAsTuple (Convert.ToInt32(oldTermList.["startRow"])) (Convert.ToInt32(oldTermList.["startCol"]))
+    let newStartCell = getStartCellAsTuple (Convert.ToInt32(newTermList.["startRow"])) (Convert.ToInt32(newTermList.["startCol"]))
 
-    let termListold = ExcelDataFile.create oldFilename oldWorksheet oldStartCell oldNumRows true
-    let termListnew = ExcelDataFile.create newFilename newWorksheet newStartCell newNumRows true
-
+    let termListold = ExcelDataFile.create oldTermList.["filename"] oldTermList.["worksheet"] oldStartCell (Convert.ToInt32(oldTermList.["numRows"])) true
+    let termListnew = ExcelDataFile.create newTermList.["filename"] newTermList.["worksheet"] newStartCell (Convert.ToInt32(newTermList.["numRows"])) true
 
     let cleanedTermListold = cleanTerminationList termListold false
     let cleanedTermListnew = cleanTerminationList termListnew false
@@ -76,31 +76,3 @@ let createMPFat ioData termData instrumentData (listofMarshallingPanels:ResizeAr
     fatSheetFilename
 
     
-
-//
-//    let mutable complete = false
-//
-//    let ioList1306 = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Motherwell\1306\1306-IN-LST-1002_5.007.120601.xlsm" "1306-IN-LST-1002_5" (3,1) 8397 true
-//    let listIO1306 = getExcelDataAsListOf<IORecord> ioList1306
-//
-//    let termList1306 = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Motherwell\1306\1306-IN-LST-1031_4.PDT.008.120608.001.120614.xlsm" "1306-IN-LST-1031_4" (6,1) 4332 true
-//    let listTerm1306 = getExcelDataAsListOf<TermRecord> termList1306
-//
-//    let termList1307 = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Motherwell\1306\1307-IN-LST-1031_3.002.120612.001.120614.xlsm" "1307-IN-LIST-1031_3" (6,1) 1024 true
-//    let listTerm1307 = getExcelDataAsListOf<TermRecord> termList1307
-//
-//    let listTermComplete1306 = listTerm1306 @ listTerm1307
-//
-//    let instrumentList1306 = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Motherwell\1306\1306-IN-LST-1004_1.xlsm" "1306-IN-LST-1004_1" (3,1) 830 true 
-//    let listInstrument1306 = getExcelDataAsListOf<InstrumentRecord> instrumentList1306
-//
-//    let instrumentList1307 = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Motherwell\1306\1307-IN-LST-1004_1.xlsm" "Index" (3,1) 270 true
-//    let listInstrument1307 = getExcelDataAsListOf<InstrumentRecord> instrumentList1307
-//
-//    let listInstrumentComplete1306 = listInstrument1306 @ listInstrument1307
-//
-//    let listofMarshallingPanels = ["1306-MP-221"; "1306-MP-222"; "1306-MP-223"; "1306-MP-224"]
-//    let templateFile = @"C:\Users\JGarces\Documents\Work\Motherwell\1306\MarshallingPanelTemplate.xlsm"
-//    createMPFatLists templateFile listTermComplete1306 listIO1306 listInstrumentComplete1306 listofMarshallingPanels
-//
-//    complete <- true

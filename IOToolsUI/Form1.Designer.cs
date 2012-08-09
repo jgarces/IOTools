@@ -53,7 +53,6 @@
             this.lblFatInstStartCell = new System.Windows.Forms.Label();
             this.numFatInstRowStart = new System.Windows.Forms.NumericUpDown();
             this.selFatInstWorksheets = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
             this.btnFatAddTermToList = new System.Windows.Forms.Button();
             this.numFatTermColStart = new System.Windows.Forms.NumericUpDown();
             this.lblFatTermStartCell = new System.Windows.Forms.Label();
@@ -222,9 +221,10 @@
             // 
             // btnCompareLists
             // 
+            this.btnCompareLists.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCompareLists.Location = new System.Drawing.Point(16, 271);
             this.btnCompareLists.Name = "btnCompareLists";
-            this.btnCompareLists.Size = new System.Drawing.Size(185, 23);
+            this.btnCompareLists.Size = new System.Drawing.Size(161, 46);
             this.btnCompareLists.TabIndex = 5;
             this.btnCompareLists.Text = "Compare";
             this.btnCompareLists.UseVisualStyleBackColor = true;
@@ -308,7 +308,6 @@
             this.tabCompareIOList.Controls.Add(this.lblFatInstStartCell);
             this.tabCompareIOList.Controls.Add(this.numFatInstRowStart);
             this.tabCompareIOList.Controls.Add(this.selFatInstWorksheets);
-            this.tabCompareIOList.Controls.Add(this.button1);
             this.tabCompareIOList.Controls.Add(this.btnFatAddTermToList);
             this.tabCompareIOList.Controls.Add(this.numFatTermColStart);
             this.tabCompareIOList.Controls.Add(this.lblFatTermStartCell);
@@ -415,7 +414,7 @@
             this.numFatInstRowStart.Size = new System.Drawing.Size(40, 20);
             this.numFatInstRowStart.TabIndex = 22;
             this.numFatInstRowStart.Value = new decimal(new int[] {
-            6,
+            2,
             0,
             0,
             0});
@@ -432,16 +431,6 @@
             this.selFatInstWorksheets.Text = "Select Worksheet";
             this.selFatInstWorksheets.Visible = false;
             this.selFatInstWorksheets.SelectedIndexChanged += new System.EventHandler(this.selFatInstWorksheets_SelectedIndexChanged);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(549, 7);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 20;
-            this.button1.Text = "dbg";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // btnFatAddTermToList
             // 
@@ -750,7 +739,6 @@
         private System.Windows.Forms.Label lblFatTermStartCell;
         private System.Windows.Forms.NumericUpDown numFatTermRowStart;
         private System.Windows.Forms.ComboBox selFatTermWorksheets;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button btnFatAddInstToList;
         private System.Windows.Forms.NumericUpDown numFatInstColStart;
         private System.Windows.Forms.Label lblFatInstStartCell;
