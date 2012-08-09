@@ -35,7 +35,7 @@ let createCBAllocationMap (marshallingPanels: MarshallingPanel list) =
             | head :: tail ->
                 let currentCount =
                     match head.PartNumber with
-                        |"" -> Some(cbAllocation + 1)
+                        |"IC200MDL940"|"IC200ALG262"|"IC200ALG230" -> Some(cbAllocation + 1)
                         | _ -> None
                 mapSlots tail currentMP currentPLC currentRack (mapCBAllocation currentMP currentPLC currentRack head.SlotNo currentCount currentCBMap) currentCount.Value
             | [] ->
@@ -70,20 +70,6 @@ let createCBAllocationMap (marshallingPanels: MarshallingPanel list) =
 
 
 
-
-
-//    let determineCBAllocation (marshallingPanel: MarshallingPanel) (currentCBMap: Map<string*string*string*string, int>) =
-//        match items
-//        let plcs = List.sortBy (fun (plc:PLC) -> rankProcessorForCBAlllocation plc.PLCNo) marshallingPanel.PLCs
-//
-//        currentCBMap
-
-//    let rec mapAsRequired (marshallingPanels: MarshallingPanel list) (currentCBMap: Map<string*string*string*string, int>) =
-//        match marshallingPanels with
-//            | head :: tail ->
-//                mapAsRequired tail (determineCBAllocation head currentCBMap)               
-//            | [] ->
-//                currentCBMap
 
         
 
