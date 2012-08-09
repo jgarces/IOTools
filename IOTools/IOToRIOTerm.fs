@@ -176,7 +176,7 @@ let determineRIOTermMarkupsFromIO  (ioListMap:Map<string list, IORecord>) (rioTe
             List.fold (fun acc (aSlot:Slot)  -> acc || (aSlot.NoChannelsUsed < aSlot.NoChannels)) false rack.Slots
         /// This function determines if a rack has spared for the RIO Type
         let availableSparesForType (rack:Rack) =
-            List.fold (fun acc (aSlot:Slot)  -> acc || aSlot.OfType = getSlotType(signalTypeField) && (aSlot.NoChannelsUsed < aSlot.NoChannels)) false rack.Slots
+            List.fold (fun acc (aSlot:Slot)  -> acc || aSlot.OfType = (getSlotType aSlot.PartNumber signalTypeField) && (aSlot.NoChannelsUsed < aSlot.NoChannels)) false rack.Slots
         /// This function detemines if a selected slots meet Spare requirements. Assumes that the slots provide are on a particular type.
         let meetsSpareRequirements (slots: Slot list) =
             let totalChannels = List.fold(fun acc (aSlot:Slot) -> acc + aSlot.NoChannels) 0 slots
@@ -188,7 +188,7 @@ let determineRIOTermMarkupsFromIO  (ioListMap:Map<string list, IORecord>) (rioTe
         let plc = ref (List.filter(fun (aPLC:PLC) -> aPLC.PLCNo = plcField) marshallingPanel.Value.PLCs).Head
         if isAllocated then
             let rack = ref (List.filter(fun (aRack:Rack) -> aRack.RackNo = !rackField) plc.Value.Racks).Head
-            let slots = List.filter(fun (aSlot:Slot) -> aSlot.OfType = getSlotType(signalTypeField)) rack.Value.Slots
+            let slots = List.filter(fun (aSlot:Slot) -> aSlot.OfType = (getSlotType aSlot.PartNumber signalTypeField)) rack.Value.Slots
             let allocatedRemoteIORecord = (List.filter(fun (rioTermMapListItem:(string list) * RIOTermRecord) -> 
                                                                 ((snd rioTermMapListItem).Processor3 = plcField) &&
                                                                 ((snd rioTermMapListItem).Rack4 = string !rackField) &&
@@ -197,9 +197,9 @@ let determineRIOTermMarkupsFromIO  (ioListMap:Map<string list, IORecord>) (rioTe
             (meetsSpareRequirements slots), Some(snd allocatedRemoteIORecord)
         else
             let rack = ref (List.filter(fun (aRack:Rack) -> (availableSparesForType aRack)) plc.Value.Racks).Head
-            let slots = List.filter(fun (aSlot:Slot) -> aSlot.OfType = getSlotType(signalTypeField)) rack.Value.Slots
+            let slots = List.filter(fun (aSlot:Slot) -> aSlot.OfType = (getSlotType aSlot.PartNumber signalTypeField)) rack.Value.Slots
             let availableslots = rack.Value.Slots
-                                    |> List.filter(fun (aSlot:Slot) -> aSlot.OfType = getSlotType(signalTypeField))
+                                    |> List.filter(fun (aSlot:Slot) -> aSlot.OfType = (getSlotType aSlot.PartNumber signalTypeField))
                                     |> List.filter(fun (aSlot:Slot) -> (float aSlot.NoChannelsUsed) / (float aSlot.NoChannels) < 0.8)
                                     |> List.sortBy(fun (aSlot:Slot) -> (float aSlot.NoChannelsUsed) / (float aSlot.NoChannelsUsed))
                                     |> List.rev

@@ -71,14 +71,14 @@ type RIOTermRecord =
         mutable ConnectionDrawing25: string;
         mutable Comments26: string;
         mutable Revision27: string;
-//        mutable Ignore28: string;
-//        mutable UpdatedFlag29: bool;
-//        mutable AddedFlag30: bool;
-//        mutable DeletedFlag31: bool;
-//        mutable CardType32: string;
-//        mutable SecondaryAddress33: string;
-//        mutable SecondaryAddressDescription34: string;
-//        mutable TotalAddressReservation35: string;
+        mutable Ignore28: string;
+        mutable UpdatedFlag29: string;
+        mutable AddedFlag30: string;
+        mutable DeletedFlag31: string;
+        mutable CardType32: string;
+        mutable SecondaryAddress33: string;
+        mutable SecondaryAddressDescription34: string;
+        mutable TotalAddressReservation35: string;
     }
 
 /// This record definition defines the data in a Karara RIO Lists row minus the addition remark field that has been added in the latest termination lists.
@@ -297,6 +297,7 @@ type IOType =
         | DO = 1
         | AI = 2
         | AO = 3
+        | Mixed = 4
 
 
 /// This record defines a data structure that represents a slot in the VersaMax rack
@@ -305,15 +306,17 @@ type Slot =
         mutable SlotNo:int;
         mutable OfType:IOType;
         mutable Differential:bool;
+        mutable PartNumber:string;
         mutable NoChannels:int;
         mutable NoChannelsUsed:int;
     }
     with
-        static member create slotNo ofType differential noChannels noChannelsUsed =
+        static member create slotNo ofType differential partNumber noChannels noChannelsUsed =
             {
                 SlotNo = slotNo;
                 OfType = ofType;
                 Differential = differential;
+                PartNumber = partNumber;
                 NoChannels = noChannels;
                 NoChannelsUsed = noChannelsUsed;
             }
@@ -772,12 +775,13 @@ let mapIOList (ioList:IORecord list) (listOfExceptions:IOSpecialHandling list) =
     (mapAsRequired ioList listOfOtherExceptions Map.empty) , ioListAddressMap
 
 /// This function is used to translate the IO label in the enumeration type
-let getSlotType (slotTypeName:string) =
-    match slotTypeName with
-        | "DI" -> IOType.DI
-        | "DO" -> IOType.DO
-        | "AI" -> IOType.AI
-        | "AO" -> IOType.AO
+let getSlotType (cardType:string) (slotTypeName:string) =
+    match cardType, slotTypeName with
+        | "IC200MDD844",_|"IC200MDD841",_ -> IOType.Mixed
+        | _,"DI" -> IOType.DI
+        | _,"DO" -> IOType.DO
+        | _,"AI" -> IOType.AI
+        | _,"AO" -> IOType.AO
         | _ -> IOType.DI
 
 /// This function is used to create a map of Remote IO Termination list and compose a Rack allocation data structure for validation.
@@ -813,13 +817,23 @@ let mapRIOTermList (rioTermList:RIOTermRecord list) =
             | ex -> None
 
 
-
+    ///This function is used to determine is a slot is differential based on whether a second terminal has been allocated to the channel. Note that channels that share a common are also considered differential here.
     let determineIfDifferential (terminal2:string) =
         match terminal2 with
             | null | "" -> false
             | _ -> true
 
-    let determineNoChannels (ioType:IOType) (isDifferential:bool) =
+    ///This function is used to determine the number of channels in the slot/card based on the card type
+    let determineNoChannels (cardType:string) =
+        match cardType with
+            |"IC200MDL940" -> 16
+            |"IC200ALG264" -> 15
+            |"IC200ALG262"|"IC200ALG326" -> 8
+            |"IC200ALG230"|"IC200ALG322" -> 4
+            | _ -> 32
+
+    ///This function is the old that that was used to determin the number of channels in the slot/card based the IO Type and whether a channel was single ended or not (Differential)
+    let determineNoChannelsOld (ioType:IOType) (isDifferential:bool) =
         match ioType, isDifferential with
             | IOType.DI, _ -> 32
             | IOType.DO, false -> 32
@@ -828,19 +842,21 @@ let mapRIOTermList (rioTermList:RIOTermRecord list) =
             | IOType.AI, true -> 8
             | IOType.AO, _ -> 8
             | _ , _ -> 32
-                
+
+    ///This function is used to add a slot record to the data structure if determines the RIO Termination Reference list and indicates another card and updates the number of channels used in the card     
     let addSlotIfRequired slots (head:RIOTermRecord) =
         match tryAndFindSlot (int head.Slot5) slots with
             | None ->
-                let ioType = getSlotType head.SignalType18
+                let ioType = getSlotType head.CardType32 head.SignalType18
                 let isDifferential = determineIfDifferential head.Terminal2_12
-                let noChannels = determineNoChannels ioType isDifferential
-                let slot = Slot.create (int head.Slot5) ioType isDifferential noChannels 1
+                let noChannels = determineNoChannels head.CardType32
+                let slot = Slot.create (int head.Slot5) ioType isDifferential head.CardType32 noChannels 1
                 slot :: slots
             | Some(existingSlot) ->
                 if not(head.Tagname1.StartsWith("Spare")) then
                     existingSlot.NoChannelsUsed <- existingSlot.NoChannelsUsed + 1
                 slots
+         
                                
     let addRackIfRequired racks (head:RIOTermRecord) =
         match tryAndFindRack (int head.Rack4) racks with
@@ -882,7 +898,8 @@ let mapRIOTermList (rioTermList:RIOTermRecord list) =
     mapAsRequired rioTermList Map.empty Map.empty List.empty
 
 /// This function is used to map individual terminations associated to a single tag.
-let mapTermList (termList:TermRecord list) =
+let mapTermList (termList:TermRecord list) = 
+
 
     let updateMap (termRecord:TermRecord) (currentTermMap: Dictionary<string, TermRecord list>) =
         match termRecord with
@@ -890,6 +907,7 @@ let mapTermList (termList:TermRecord list) =
         | termRecord when currentTermMap.ContainsKey(termRecord.Tagname1.Replace(" ", "")) -> currentTermMap.[termRecord.Tagname1.Replace(" ", "")] <- Seq.toList ( Seq.sort (termRecord :: currentTermMap.[termRecord.Tagname1.Replace(" ", "")]))
         | termRecord when not(currentTermMap.ContainsKey(termRecord.Tagname1.Replace(" ", ""))) -> currentTermMap.Add(termRecord.Tagname1.Replace(" ", ""), [termRecord])
         | _ -> ()
+
     let rec mapAsRequired (termList:TermRecord list) (currentTermMap: Dictionary<string, TermRecord list>) =
         match termList with
             | head :: tail ->

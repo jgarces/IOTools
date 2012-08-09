@@ -9,6 +9,7 @@ open CompareIOLists
 open CompareTermLists
 open IOToRIOTerm
 open RIOTermToIO
+open RIOTermToTerm
 open API
 open Microsoft.FSharp.Reflection 
 
@@ -1385,28 +1386,28 @@ open Microsoft.FSharp.Reflection
 
 //**********************************************************************
 
-let ioList1317 = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-250\1304-IN-LST-1003_2.001.120515.xlsm" "1304-IN-LST-1003_2" (2,1) 3584 true
-let listIO1317 = getExcelDataAsListOf<IORecord> ioList1317
-
-let termList1317 = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-250\1304-IN-LST-1031_3.001.120720.001.120720.xlsm" "1304-IN-LST-1031_3" (6,1) 2755 true
-let listTerm1317 = getExcelDataAsListOf<TermRecord> termList1317
-
-let termList1320 = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Motherwell\1306\1307-IN-LST-1031_3.002.120612.001.120614.xlsm" "1307-IN-LIST-1031_3" (6,1) 1024 true
-let listTerm1320 = getExcelDataAsListOf<TermRecord> termList1320
-
-let listTermComplete = listTerm1317 @ listTerm1320
-
-let instrumentList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-250\1300-IN-LST-1004_1_BMcL.xlsm" "1301 IN List bmcl revs" (2,1) 6767 true 
-let listInstrument = getExcelDataAsListOf<InstrumentRecord> instrumentList
-
-//let instrumentList1307 = ExcelDataFile.create @"C:\Users\rpattison\Documents\370\1307-IN-LST-1004_1.xlsm" "Index" (3,1) 270 true
-//let listInstrument1307 = getExcelDataAsListOf<InstrumentRecord> instrumentList1307
-
-let listInstrumentComplete = listInstrument// @ listInstrument1307
-
-let listofMarshallingPanels = ["1317-MP-280"]
-let templateFile = @"C:\Users\rpattison\Documents\Karara\MP-250\MarshallingPanelTemplate.xlsm"
-createMPFatLists templateFile listTermComplete listIO1317 listInstrumentComplete listofMarshallingPanels
+//let ioList1317 = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-250\1304-IN-LST-1003_2.001.120515.xlsm" "1304-IN-LST-1003_2" (2,1) 3584 true
+//let listIO1317 = getExcelDataAsListOf<IORecord> ioList1317
+//
+//let termList1317 = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-250\1304-IN-LST-1031_3.001.120720.001.120720.xlsm" "1304-IN-LST-1031_3" (6,1) 2755 true
+//let listTerm1317 = getExcelDataAsListOf<TermRecord> termList1317
+//
+//let termList1320 = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Motherwell\1306\1307-IN-LST-1031_3.002.120612.001.120614.xlsm" "1307-IN-LIST-1031_3" (6,1) 1024 true
+//let listTerm1320 = getExcelDataAsListOf<TermRecord> termList1320
+//
+//let listTermComplete = listTerm1317 @ listTerm1320
+//
+//let instrumentList = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\MP-250\1300-IN-LST-1004_1_BMcL.xlsm" "1301 IN List bmcl revs" (2,1) 6767 true 
+//let listInstrument = getExcelDataAsListOf<InstrumentRecord> instrumentList
+//
+////let instrumentList1307 = ExcelDataFile.create @"C:\Users\rpattison\Documents\370\1307-IN-LST-1004_1.xlsm" "Index" (3,1) 270 true
+////let listInstrument1307 = getExcelDataAsListOf<InstrumentRecord> instrumentList1307
+//
+//let listInstrumentComplete = listInstrument// @ listInstrument1307
+//
+//let listofMarshallingPanels = ["1317-MP-280"]
+//let templateFile = @"C:\Users\rpattison\Documents\Karara\MP-250\MarshallingPanelTemplate.xlsm"
+//createMPFatLists templateFile listTermComplete listIO1317 listInstrumentComplete listofMarshallingPanels
 
 //**********************************************************************
 //
@@ -1426,20 +1427,20 @@ createMPFatLists templateFile listTermComplete listIO1317 listInstrumentComplete
 
 //**********************************************************************
 
-let newFilename = @"C:\Users\rpattison\Documents\Karara\1311\1311-IN-LST-1031_0.xlsm"
-let newWorksheet = "1311-IN-LST-1031_0"
-let newStartRow = 6
-let newStartCol = 1
-let newNumRows = 757
-
-let oldFilename = @"C:\Users\rpattison\Documents\Karara\1311\1311-IN-LST-1031_1.xlsm"
-let oldWorksheet = "1311-IN-LST-1031_1"
-let oldStartRow = 6
-let oldStartCol = 1
-let oldNumRows = 775
-
-let result = API.compareTerminationLists newFilename newWorksheet newStartRow newStartCol newNumRows oldFilename oldWorksheet oldStartRow oldStartCol oldNumRows
-Console.WriteLine(result);
+//let newFilename = @"C:\Users\rpattison\Documents\Karara\1311\1311-IN-LST-1031_0.xlsm"
+//let newWorksheet = "1311-IN-LST-1031_0"
+//let newStartRow = 6
+//let newStartCol = 1
+//let newNumRows = 757
+//
+//let oldFilename = @"C:\Users\rpattison\Documents\Karara\1311\1311-IN-LST-1031_1.xlsm"
+//let oldWorksheet = "1311-IN-LST-1031_1"
+//let oldStartRow = 6
+//let oldStartCol = 1
+//let oldNumRows = 775
+//
+//let result = API.compareTerminationLists newFilename newWorksheet newStartRow newStartCol newNumRows oldFilename oldWorksheet oldStartRow oldStartCol oldNumRows
+//Console.WriteLine(result);
 
 
 //let termListold = ExcelDataFile.create @"C:\Users\rpattison\Documents\Karara\1311\1311-IN-LST-1031_0.xlsm" "1311-IN-LST-1031_0" (6,1) 757 true
@@ -1477,6 +1478,41 @@ Console.WriteLine(result);
 //let fileMarkup = FileMarkup.create rioTermList1317 marklist "2.001"
 //
 //performMarkups<RIOTermRecord> fileMarkup true
+
+//**********************************************************************
+
+//let termListold = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Test\1301-IN-LST-1031_0.002.120529.xlsm" "1301-IN-LST-1031_0" (6,1) 1237 true
+//let termListnew = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\Test\1301-IN-LST-1031_0.002.120529.Diff.xlsm" "1301-IN-LST-1031_0" (6,1) 1237 true
+//
+//
+//let cleanedTermListold = cleanTerminationList termListold false
+//let cleanedTermListnew = cleanTerminationList termListnew false
+//
+//if cleanedTermListold.IsSome && cleanedTermListnew.IsSome then
+//    let listTermold = getExcelDataAsListOf<TermRecord> cleanedTermListold.Value
+//    let listTermnew = getExcelDataAsListOf<TermRecord> cleanedTermListnew.Value
+//
+//    let mappedTermlistold = mapTermList listTermold
+//    let mappedTermlistnew = mapTermList listTermnew
+//
+//    let markuplist = compareTermLists mappedTermlistnew mappedTermlistold
+//    let fileMarkup = FileMarkup.create cleanedTermListnew.Value markuplist "0.001"
+//    let testMarkup = performMarkups<TermRecord> fileMarkup false
+//    ()
+
+//**********************************************************************
+//**********************************************************************
+
+
+let rioTermList = ExcelDataFile.create @"C:\Users\JGarces\Documents\Work\TerminationsJune\Termination\1301\RemoteIO.1301.Termination.Reference.xlsx" "1301" (2,1) 796 true 
+
+let listRioTerm = getExcelDataAsListOf<RIOTermRecord> rioTermList
+
+let (rioTermMap, rioTermAddressMap), marshallingPanelList = mapRIOTermList listRioTerm
+
+let myMap = createCBAllocationMap marshallingPanelList
+
+//**********************************************************************
 
 let finished = true
 
