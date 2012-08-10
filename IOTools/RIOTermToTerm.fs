@@ -13,55 +13,49 @@ let rankProcessorForCBAlllocation (processor:string) =
         |_ -> 4 
 
 
-//type MPEquipmentList =
-//    | MPPLCs of PLC list
-//    | MPRacks of Rack list
-//    | MPSlots of Slot list
-//
-//type MPEquipment =
-//    | MPPLC of PLC
-//    | MPRack of Rack
-//    | MPSlot of Slot
-
 ///This function is used to create a map to CBAllocation assigned to slots
 let createCBAllocationMap (marshallingPanels: MarshallingPanel list) =
 
 
-    let mapCBAllocation currentMP currentPLC currentRack currentSlot cbAllocation (currentCBMap: Map<string*string*int*int, int option>) =
+    let mapCBAllocation currentMP currentPLC currentRack currentSlot cbAllocation (currentCBMap: Map<string*string*int*int, int>) =
         currentCBMap.Add((currentMP,currentPLC,currentRack,currentSlot),cbAllocation)
         
-    let rec mapSlots (slots:Slot list) currentMP currentPLC currentRack (currentCBMap: Map<string*string*int*int, int option>) cbAllocation = 
+    let rec mapSlots (slots:Slot list) currentMP currentPLC currentRack (currentCBMap: Map<string*string*int*int, int>) cbAllocation = 
         match slots with
             | head :: tail ->
-                let currentCount =
+                let slotCBAllocation =
                     match head.PartNumber with
-                        |"IC200MDL940"|"IC200ALG262"|"IC200ALG230" -> Some(cbAllocation + 1)
-                        | _ -> None
-                mapSlots tail currentMP currentPLC currentRack (mapCBAllocation currentMP currentPLC currentRack head.SlotNo currentCount currentCBMap) currentCount.Value
+                        |"IC200MDL940"|"IC200ALG262"|"IC200ALG230" -> 0
+                        | _ -> cbAllocation + 1
+                let cbAllocationLocal =
+                    match slotCBAllocation with
+                        | 0 -> cbAllocation
+                        | _ -> slotCBAllocation
+                mapSlots tail currentMP currentPLC currentRack (mapCBAllocation currentMP currentPLC currentRack head.SlotNo slotCBAllocation currentCBMap) cbAllocationLocal
             | [] ->
                 currentCBMap, cbAllocation
 
-    let rec mapRacks (racks:Rack list) currentMP currentPLC (currentCBMap: Map<string*string*int*int, int option>) cbAllocation = 
+    let rec mapRacks (racks:Rack list) currentMP currentPLC (currentCBMap: Map<string*string*int*int, int>) cbAllocation = 
         match racks with
             | head :: tail ->
-                let currentCBMap, currentCount = mapSlots (List.sortBy(fun (slot:Slot) -> slot.SlotNo) head.Slots) currentMP currentPLC head.RackNo  currentCBMap cbAllocation
-                mapRacks tail currentMP currentPLC currentCBMap currentCount
+                let map, currentCount = mapSlots (List.sortBy(fun (slot:Slot) -> slot.SlotNo) head.Slots) currentMP currentPLC head.RackNo  currentCBMap cbAllocation
+                mapRacks tail currentMP currentPLC map currentCount
             | [] ->
                 currentCBMap, cbAllocation
 
-    let rec mapPLCs (plcs:PLC list) currentMP (currentCBMap: Map<string*string*int*int, int option>) cbAllocation = 
+    let rec mapPLCs (plcs:PLC list) currentMP (currentCBMap: Map<string*string*int*int, int>) cbAllocation = 
         match plcs with
             | head :: tail ->
-                let currentCBMap, currentCount = mapRacks (List.sortBy(fun (rack:Rack) -> rack.RackNo) head.Racks) currentMP head.PLCNo  currentCBMap cbAllocation
-                mapPLCs tail currentMP currentCBMap currentCount
+                let map, currentCount = mapRacks (List.sortBy(fun (rack:Rack) -> rack.RackNo) head.Racks) currentMP head.PLCNo  currentCBMap cbAllocation
+                mapPLCs tail currentMP map currentCount
             | [] ->
                 currentCBMap, cbAllocation
 
-    let rec mapMarshallingPanels (marshallingPanels:MarshallingPanel list) (currentCBMap: Map<string*string*int*int, int option>) = 
+    let rec mapMarshallingPanels (marshallingPanels:MarshallingPanel list) (currentCBMap: Map<string*string*int*int, int>) = 
         match marshallingPanels with
             | head :: tail ->
-                let currentCBMap, currentCount = (mapPLCs (List.sortBy(fun (plc:PLC) -> rankProcessorForCBAlllocation plc.PLCNo) head.PLCs) head.MarshallingPanelNo currentCBMap 0)
-                mapMarshallingPanels tail currentCBMap
+                let map, currentCount = (mapPLCs (List.sortBy(fun (plc:PLC) -> rankProcessorForCBAlllocation plc.PLCNo) head.PLCs) head.MarshallingPanelNo currentCBMap 0)
+                mapMarshallingPanels tail map
             | [] ->
                 currentCBMap
 
@@ -74,7 +68,7 @@ let createCBAllocationMap (marshallingPanels: MarshallingPanel list) =
         
 
 ///This function is used to determine the required markup to the termination list based on the data in the RIO Termination Reference List.
-let determineTermMarkups (termListMap:Map<string list, IORecord>) (rioTermListMap:Map<string list, RIOTermRecord>) (rioTermListAddressMap:Map<string list, RIOTermRecord>) (marshallingPanels: MarshallingPanel list) =
+let determineTermMarkups (termListMap:Map<string, TermRecord list>) (rioTermListMap:Map<string list, RIOTermRecord>) (rioTermListAddressMap:Map<string list, RIOTermRecord>) (marshallingPanels: MarshallingPanel list) =
 
     let termRecordType = typeof<TermRecord>
     let rioTermRecordType = typeof<RIOTermRecord>
@@ -91,6 +85,16 @@ let determineTermMarkups (termListMap:Map<string list, IORecord>) (rioTermListMa
     let termMapList = Map.toList termListMap
     let rioTermMapList = Map.toList rioTermListMap
     let rioTermMapListWithoutSpares = List.filter(fun (rioTermMapList:string list * RIOTermRecord) -> not((snd rioTermMapList).Tagname1.StartsWith("Spare"))) rioTermMapList
+    let cbAllocationMap = createCBAllocationMap marshallingPanels
+
+    /// This function is used to check an individual termination.
+    let checkTerminations (termMapListitem:string*TermRecord list) =
+        //Required since we can not be ensured that the terminal are in the correction order in the spreadsheet
+        let orderedTermRecords = List.sortBy(fun (termRecord:TermRecord) -> termRecord.MPFieldTerm24) (snd termMapListitem)
+
+        ()
+
+    List.iter checkTerminations termMapList
 
 
 
