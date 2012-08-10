@@ -22,7 +22,9 @@ namespace IOToolsUI
         {
             InitializeComponent();
 
-            //this.tabControl1.SelectedTab = tabCompareIOList;
+            if (!Directory.Exists(@"C:\Temp")) {
+                Directory.CreateDirectory(@"C:\Temp");
+            }
         }
 
         /****************************************************************
@@ -109,7 +111,8 @@ namespace IOToolsUI
             if (File.Exists(sFilePath))
             {
                 FileInfo fi = new FileInfo(sFilePath);
-                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                //FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                FileInfo nfi = fi.CopyTo(@"C:\Temp\" + fi.Name, true);
 
                 ExcelPackage epLatest = new ExcelPackage(nfi);
 
@@ -167,7 +170,8 @@ namespace IOToolsUI
             if (File.Exists(sFilePath))
             {
                 FileInfo fi = new FileInfo(sFilePath);
-                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                //FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                FileInfo nfi = fi.CopyTo(@"C:\Temp\" + fi.Name, true);
 
                 ExcelPackage epPrevious = new ExcelPackage(nfi);
 
@@ -281,7 +285,8 @@ namespace IOToolsUI
             if (File.Exists(sFilePath) )
             {
                 FileInfo fi = new FileInfo(sFilePath);
-                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                //FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                FileInfo nfi = fi.CopyTo(@"C:\Temp\" + fi.Name, true);
                 ExcelPackage ep = new ExcelPackage(nfi);
 
                 CurDataFile.Filename = nfi.FullName;
@@ -369,8 +374,8 @@ namespace IOToolsUI
             if (File.Exists(sFilePath))
             {
                 FileInfo fi = new FileInfo(sFilePath);
-                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
-                Console.WriteLine(nfi.FullName);
+                //FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                FileInfo nfi = fi.CopyTo(@"C:\Temp\" + fi.Name, true);
                 ExcelPackage ep = new ExcelPackage(nfi);
 
                 CurDataFile.Filename = nfi.FullName;
@@ -458,7 +463,8 @@ namespace IOToolsUI
             if (File.Exists(sFilePath))
             {
                 FileInfo fi = new FileInfo(sFilePath);
-                FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                //FileInfo nfi = fi.CopyTo("data\\" + fi.Name, true);
+                FileInfo nfi = fi.CopyTo(@"C:\Temp\" + fi.Name, true);
                 ExcelPackage ep = new ExcelPackage(nfi);
 
                 CurDataFile.Filename = nfi.FullName;
